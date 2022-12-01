@@ -3,23 +3,25 @@ package day01
 import readInput
 
 fun part1(input: List<String>): Int {
-    return sumsByElf(input).maxOf { it }
+    return sumsByElf(input.toMutableList()).maxOf { it }
 }
 
-private fun sumsByElf(input: List<String>): MutableList<Int> {
-    val sums = mutableListOf<Int>()
+private fun sumsByElf(input: MutableList<String>): List<Int> {
     var sum = 0
-    input.forEach {
+    return input.map {
         if (it.isBlank()) {
-            sums.add(sum)
+            val tmp = sum
             sum = 0
-        } else sum += it.toInt()
+            tmp
+        } else {
+            sum += it.toInt()
+            0
+        }
     }
-    return sums
 }
 
 fun part2(input: List<String>): Int {
-    return sumsByElf(input).sorted().takeLast(3).sum()
+    return sumsByElf(input.toMutableList()).sorted().takeLast(3).sum()
 }
 
 fun main() {
