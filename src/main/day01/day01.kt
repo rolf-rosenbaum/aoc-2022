@@ -3,10 +3,10 @@ package day01
 import readInput
 
 fun part1(input: List<String>): Int {
-    return sumsByElf(input.toMutableList()).maxOf { it }
+    return sumsByElf(input).maxOf { it }
 }
 
-private fun sumsByElf(input: MutableList<String>): List<Int> {
+private fun sumsByElf(input: List<String>): List<Int> {
     var sum = 0
     return input.map {
         if (it.isBlank()) {
@@ -21,7 +21,7 @@ private fun sumsByElf(input: MutableList<String>): List<Int> {
 }
 
 fun part2(input: List<String>): Int {
-    return sumsByElf(input.toMutableList()).sorted().takeLast(3).sum()
+    return sumsByElf(input).sorted().takeLast(3).sum()
 }
 
 fun main() {
