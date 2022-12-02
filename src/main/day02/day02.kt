@@ -1,6 +1,7 @@
 package day02
 
 import readInput
+import reverse
 import second
 
 const val ROCK = "A"
@@ -36,16 +37,16 @@ fun part1(input: List<String>): Int {
 
 fun part2(input: List<String>): Int {
     return input.toPairs().sumOf {
-        when (it) {
-            ROCK to LOSE -> 0 + 3
-            ROCK to DRAW -> 3 + 1
-            ROCK to WIN -> 6 + 2
-            PAPER to LOSE -> 0 + 1
-            PAPER to DRAW -> 3 + 2
-            PAPER to WIN -> 6 + 3
-            SCISSORS to LOSE -> 0 + 2
-            SCISSORS to DRAW -> 3 + 3
-            SCISSORS to WIN -> 6 + 1
+        when (it.reverse()) {
+            LOSE to ROCK -> 0 + 3
+            DRAW to ROCK -> 3 + 1
+            WIN to ROCK -> 6 + 2
+            LOSE to PAPER -> 0 + 1
+            DRAW to PAPER -> 3 + 2
+            WIN to PAPER -> 6 + 3
+            LOSE to SCISSORS -> 0 + 2
+            DRAW to SCISSORS -> 3 + 3
+            WIN to SCISSORS -> 6 + 1
 
             else -> error("invalid pair")
         }.toInt()
