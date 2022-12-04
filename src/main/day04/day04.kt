@@ -13,11 +13,11 @@ fun main() {
     println(part2(input))
 }
 
-private fun List<String>.solve(testFunction: (IntRange, IntRange) -> Boolean) =
+private fun List<String>.solve(check: IntRange.(IntRange) -> Boolean) =
     map {
         it.toRanges()
     }.count {
-        testFunction(it.first, it.second)
+        it.first.check(it.second)
     }
 
 fun String.toRanges(): Pair<IntRange, IntRange> {
