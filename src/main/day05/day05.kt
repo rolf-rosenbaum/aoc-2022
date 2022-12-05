@@ -3,54 +3,65 @@ package day05
 import java.util.*
 import readInput
 
-
 val stackIndices = listOf(1, 5, 9, 13, 17, 21, 25, 29, 33)
+var stacks: List<Stack<Char>> = emptyList()
+var moves: List<Move> = emptyList()
 
 val regex by lazy { """move (\d+) from (\d) to (\d)""".toRegex() }
 
-fun part1(input: List<String>): String {
-    val stacks = input.take(8).parseToStacks()
-    val moves = input.drop(10).parseMoves()
-
-    moves.forEach {
-        repeat(it.numberOfCrates) { _ ->
-            stacks[it.to - 1].push(stacks[it.from - 1].pop())
-        }
-    }
-    return stacks.map {
-        it.pop()
-    }.joinToString("")
-}
-
-fun part2(input: List<String>): String {
-
-    val stacks = input.take(8).parseToStacks()
-    val moves = input.drop(10).parseMoves()
-    moves.forEach {
-        val tmp = mutableListOf<Char>()
-        repeat(it.numberOfCrates) { _ ->
-            tmp.add(stacks[it.from - 1].pop())
-        }
-        tmp.reversed().forEach { c ->
-            stacks[it.to - 1].push(c)
-        }
-    }
-    return stacks.map {
-        it.pop()
-    }.joinToString("")
-
-
-
-
-    return "error"
-}
-
 fun main() {
     val input = readInput("main/day05/Day05")
+
     println(part1(input))
     println(part2(input))
 }
 
+fun part1(input: List<String>): String {
+
+    input.parse()
+    rearrange(::movingSingleCrate)
+
+    return message()
+}
+
+fun part2(input: List<String>): String {
+
+    input.parse()
+    rearrange(::movingPartialStack)
+
+    return message()
+}
+
+private fun List<String>.parse() {
+    stacks = take(8).parseToStacks()
+    moves = drop(10).parseMoves()
+}
+
+private fun rearrange(move: (Move, List<Stack<Char>>) -> Unit) {
+    moves.forEach {
+        move(it, stacks)
+    }
+}
+
+private fun movingSingleCrate(move: Move, stacks: List<Stack<Char>>) {
+    repeat(move.numberOfCrates) { _ ->
+        stacks[move.to - 1].push(stacks[move.from - 1].pop())
+    }
+}
+
+private fun movingPartialStack(move: Move, stacks: List<Stack<Char>>) {
+    val tmp = mutableListOf<Char>()
+    repeat(move.numberOfCrates) { _ ->
+        tmp.add(stacks[move.from - 1].pop())
+    }
+    tmp.reversed().forEach { c ->
+        stacks[move.to - 1].push(c)
+    }
+}
+
+private fun message() = stacks.map {
+    it.pop()
+}.joinToString("")
 
 fun List<String>.parseMoves(): List<Move> {
     return this.map {
