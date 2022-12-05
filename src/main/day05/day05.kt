@@ -32,9 +32,9 @@ fun part2(input: List<String>): String {
     return message()
 }
 
-private fun List<String>.parse() {
-    stacks = take(8).parseToStacks()
-    moves = drop(10).parseMoves()
+private fun List<String>.parse(numOfRows: Int = 8, numOfStacks: Int = 9) {
+    stacks = take(numOfRows).parseToStacks(numOfStacks)
+    moves = drop(numOfRows + 2).parseMoves()
 }
 
 private fun rearrange(move: (Move, List<Stack<Char>>) -> Unit) {
@@ -71,9 +71,9 @@ fun List<String>.parseMoves(): List<Move> {
     }
 }
 
-fun List<String>.parseToStacks(): List<Stack<Char>> {
+fun List<String>.parseToStacks(numOfStacks: Int): List<Stack<Char>> {
     val result = mutableListOf<Stack<Char>>()
-    repeat(9) { result.add(Stack()) }
+    repeat(numOfStacks) { result.add(Stack()) }
     this.reversed().forEach { s ->
         s.forEachIndexed { index, c ->
             if (index in stackIndices) {
