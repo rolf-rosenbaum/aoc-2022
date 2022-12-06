@@ -9,12 +9,13 @@ fun main() {
     println(part2(input))
 }
 
-fun part1(input: List<String>): Int {
+fun part1(input: List<String>): Int = solve(input, 4)
 
-    return 0
-}
+fun part2(input: List<String>): Int = solve(input, 14)
 
-fun part2(input: List<String>): Int {
-
-    return 0
-}
+private fun solve(input: List<String>, size: Int): Int =
+    input.first().windowed(size).first {
+        it.toSet().size == size
+    }.let {
+        input.first().indexOf(it) + size
+    }
