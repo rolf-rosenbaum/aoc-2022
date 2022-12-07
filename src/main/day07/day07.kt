@@ -18,6 +18,8 @@ data class Directory(
     val allDirectories: List<Directory>
         get() = listOf(this) + dirs.values.flatMap { it.allDirectories }
 
+    fun root(): Directory = parent?.root() ?: this
+
     override fun hashCode(): Int {
         return name.hashCode()
     }
@@ -53,7 +55,7 @@ fun List<String>.parseDirectories(): Directory {
     var currentDirectory = root
     forEach { line ->
         when {
-            line.isCd() -> currentDirectory = cd(currentDirectory, line.lastArg(), root)
+            line.isCd() -> currentDirectory = cd(currentDirectory, line.lastArg())
             line.isDir() -> currentDirectory.dirs[line.lastArg()] = Directory(line.lastArg(), mutableSetOf(), mutableMapOf(), currentDirectory)
             line.isFile() -> currentDirectory.files.add(line.firstArg().toInt())
         }
@@ -61,10 +63,10 @@ fun List<String>.parseDirectories(): Directory {
     return root
 }
 
-private fun cd(currentDirectory: Directory, arg: String, root: Directory): Directory {
+private fun cd(currentDirectory: Directory, arg: String): Directory {
     return when (arg) {
-        "/" -> root
-        ".." -> currentDirectory.parent ?: root
+        "/" -> currentDirectory.root()
+        ".." -> currentDirectory.parent ?: currentDirectory.root()
         else -> currentDirectory.dirs[arg] ?: Directory(arg, mutableSetOf(), mutableMapOf(), currentDirectory)
     }
 }
