@@ -14,8 +14,4 @@ fun part1(input: List<String>): Int = solve(input, 4)
 fun part2(input: List<String>): Int = solve(input, 14)
 
 private fun solve(input: List<String>, size: Int): Int =
-    input.first().windowed(size).first {
-        it.toSet().size == size
-    }.let {
-        input.first().indexOf(it) + size
-    }
+    input.first().windowed(size).indexOfFirst { it.toSet().size == size } + size
