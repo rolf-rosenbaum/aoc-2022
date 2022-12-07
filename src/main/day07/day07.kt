@@ -18,7 +18,15 @@ data class Directory(
     val allDirectories: List<Directory>
         get() = listOf(this) + dirs.values.flatMap { it.allDirectories }
 
-    fun root(): Directory = parent?.root() ?: this
+    private fun root(): Directory = parent?.root() ?: this
+
+    fun changeInto(arg: String): Directory {
+        return when (arg) {
+            "/" -> root()
+            ".." -> parent ?: root()
+            else -> dirs[arg] ?: Directory(arg, mutableSetOf(), mutableMapOf(), this)
+        }
+    }
 
     override fun hashCode(): Int {
         return name.hashCode()
@@ -55,7 +63,7 @@ fun List<String>.parseDirectories(): Directory {
     var currentDirectory = root
     forEach { line ->
         when {
-            line.isCd() -> currentDirectory = cd(currentDirectory, line.lastArg())
+            line.isCd() -> currentDirectory = currentDirectory.changeInto(line.lastArg())
             line.isDir() -> currentDirectory.dirs[line.lastArg()] = Directory(line.lastArg(), mutableSetOf(), mutableMapOf(), currentDirectory)
             line.isFile() -> currentDirectory.files.add(line.firstArg().toInt())
         }
@@ -63,13 +71,6 @@ fun List<String>.parseDirectories(): Directory {
     return root
 }
 
-private fun cd(currentDirectory: Directory, arg: String): Directory {
-    return when (arg) {
-        "/" -> currentDirectory.root()
-        ".." -> currentDirectory.parent ?: currentDirectory.root()
-        else -> currentDirectory.dirs[arg] ?: Directory(arg, mutableSetOf(), mutableMapOf(), currentDirectory)
-    }
-}
 
 private fun String.lastArg() = split(" ").last()
 private fun String.firstArg() = split(" ").first()
