@@ -6,7 +6,7 @@ private const val THRESHOLD_PART1 = 100000
 private const val TOTAL_DISC_SIZE = 70000000
 private const val SIZE_FOR_UPDATE = 30000000
 
-class Directory(
+data class Directory(
     val name: String,
     val files: MutableSet<Int>,
     val dirs: MutableMap<String, Directory>,
@@ -15,7 +15,9 @@ class Directory(
     val totalSize: Int
         get() = files.sum() + dirs.values.sumOf { it.totalSize }
 
-    fun allDirectories(): List<Directory> = listOf(this) + dirs.values.flatMap { it.allDirectories() }
+    val allDirectories: List<Directory>
+        get() = listOf(this) + dirs.values.flatMap { it.allDirectories }
+
     override fun hashCode(): Int {
         return name.hashCode()
     }
@@ -32,18 +34,16 @@ fun main() {
 }
 
 fun part1(input: List<String>): Int {
-    val root = input.parseDirectories()
 
-    return root.allDirectories()
+    return input.parseDirectories().allDirectories
         .filter { it.totalSize <= THRESHOLD_PART1 }
         .sumOf { it.totalSize }
 }
 
 fun part2(input: List<String>): Int {
-    val root = input.parseDirectories()
 
-    return root.allDirectories().filter {
-        it.totalSize >= SIZE_FOR_UPDATE - (TOTAL_DISC_SIZE - root.totalSize)
+    return input.parseDirectories().allDirectories.filter {
+        it.totalSize >= SIZE_FOR_UPDATE - (TOTAL_DISC_SIZE - input.parseDirectories().totalSize)
     }.minBy { it.totalSize }.totalSize
 }
 
