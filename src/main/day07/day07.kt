@@ -2,6 +2,10 @@ package day07
 
 import readInput
 
+private const val THRESHOLD_PART1 = 100000
+private const val TOTAL_DISC_SIZE = 70000000
+private const val SIZE_FOR_UPDATE = 30000000
+
 class Directory(
     val name: String,
     val files: MutableSet<Int>,
@@ -31,7 +35,7 @@ fun part1(input: List<String>): Int {
     val root = input.parseDirectories()
 
     return root.allDirectories()
-        .filter { it.totalSize <= 100000 }
+        .filter { it.totalSize <= THRESHOLD_PART1 }
         .sumOf { it.totalSize }
 }
 
@@ -39,7 +43,7 @@ fun part2(input: List<String>): Int {
     val root = input.parseDirectories()
 
     return root.allDirectories().filter {
-        it.totalSize >= 30000000 - (70000000 - root.totalSize)
+        it.totalSize >= SIZE_FOR_UPDATE - (TOTAL_DISC_SIZE - root.totalSize)
     }.minBy { it.totalSize }.totalSize
 }
 
