@@ -28,13 +28,9 @@ data class Directory(
         }
     }
 
-    override fun hashCode(): Int {
-        return name.hashCode()
-    }
+    override fun hashCode(): Int = name.hashCode()
 
-    override fun equals(other: Any?): Boolean {
-        return if (other is Directory) name == other.name else false
-    }
+    override fun equals(other: Any?): Boolean = if (other is Directory) name == other.name else false
 }
 
 fun main() {
@@ -52,25 +48,26 @@ fun part1(input: List<String>): Int {
 
 fun part2(input: List<String>): Int {
 
-    return input.parseDirectories().allDirectories.filter {
-        it.totalSize >= SIZE_FOR_UPDATE - (TOTAL_DISC_SIZE - input.parseDirectories().totalSize)
+    val root = input.parseDirectories()
+
+    return root.allDirectories.filter {
+        it.totalSize >= SIZE_FOR_UPDATE - (TOTAL_DISC_SIZE - root.totalSize)
     }.minBy { it.totalSize }.totalSize
 }
 
 fun List<String>.parseDirectories(): Directory {
 
     val root = Directory("/", mutableSetOf(), mutableMapOf())
-    var currentDirectory = root
+    var current = root
     forEach { line ->
         when {
-            line.isCd() -> currentDirectory = currentDirectory.changeInto(line.lastArg())
-            line.isDir() -> currentDirectory.dirs[line.lastArg()] = Directory(line.lastArg(), mutableSetOf(), mutableMapOf(), currentDirectory)
-            line.isFile() -> currentDirectory.files.add(line.firstArg().toInt())
+            line.isCd() -> current = current.changeInto(line.lastArg())
+            line.isDir() -> current.dirs[line.lastArg()] = Directory(line.lastArg(), mutableSetOf(), mutableMapOf(), current)
+            line.isFile() -> current.files.add(line.firstArg().toInt())
         }
     }
     return root
 }
-
 
 private fun String.lastArg() = split(" ").last()
 private fun String.firstArg() = split(" ").first()
