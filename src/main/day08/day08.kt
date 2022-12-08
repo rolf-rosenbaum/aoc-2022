@@ -18,22 +18,15 @@ fun main() {
 }
 
 fun part1(forest: Forest): Int {
-
-
-    return forest.filter {
-        it.isHighestFromLeft(forest) || it.isHighestFromRight(forest) || it.isHighestFromTop(forest) || it.isHighestFromBottom(forest)
-    }.distinct().count()
+    return forest.count {
+        it.isVisibleFromLeft(forest) || it.isVisibleFromRight(forest) || it.isVisibleFromTop(forest) || it.isVisibleFromBottom(forest)
+    }
 }
 
 fun part2(forest: Forest): Int {
-
-    val treeMap = forest.associateBy { Point(it.x, it.y) }
-    val scores = forest.map {
-        Point(it.x, it.y) to it.scenicScore(treeMap)
+    return forest.maxOf {
+        it.scenicScore(forest.associateBy { tree -> Point(tree.x, tree.y) })
     }
-    return scores.maxBy { it.second }.also {
-        println(it.first)
-    }.second
 }
 
 data class Tree(val x: Int, val y: Int, val height: Int) {
@@ -47,55 +40,54 @@ data class Tree(val x: Int, val y: Int, val height: Int) {
         return x.hashCode() * 31 + y.hashCode()
     }
 
-    fun isHighestFromLeft(otherTrees: Forest): Boolean = otherTrees.none { it.y == y && it >= this && it.x < this.x }
+    fun isVisibleFromLeft(otherTrees: Forest): Boolean = otherTrees.none { it.y == y && it >= this && it.x < this.x }
 
-    fun isHighestFromRight(otherTrees: Forest): Boolean = otherTrees.none { it.y == y && it >= this && it.x > this.x }
+    fun isVisibleFromRight(otherTrees: Forest): Boolean = otherTrees.none { it.y == y && it >= this && it.x > this.x }
 
-    fun isHighestFromTop(otherTrees: Forest): Boolean = otherTrees.none { it.x == x && it >= this && it.y < this.y }
+    fun isVisibleFromTop(otherTrees: Forest): Boolean = otherTrees.none { it.x == x && it >= this && it.y < this.y }
 
-    fun isHighestFromBottom(otherTrees: Forest): Boolean = otherTrees.none { it.x == x && it >= this && it.y > this.y }
+    fun isVisibleFromBottom(otherTrees: Forest): Boolean = otherTrees.none { it.x == x && it >= this && it.y > this.y }
 
     fun scenicScore(treeMap: Map<Point, Tree>): Int {
-        return visibleTreesLeft(treeMap) * visibleTreesDown(treeMap) * visibleTreesRight(treeMap) * visibleTreesUp(treeMap)
+        return countVisibleTreesLeft(treeMap) * countVisibleTreesDown(treeMap) * countVisibleTreesRight(treeMap) * countVisibleTreesUp(treeMap)
     }
 
-    private fun visibleTreesLeft(treeMap: Map<Point, Tree>): Int {
+    private fun countVisibleTreesLeft(treeMap: Map<Point, Tree>): Int {
         var result = 0
         var xpos = x - 1
-        while (xpos >= 0 && treeMap[Point(xpos, y)]!! < this) {
+        while (xpos >= 0 && this > treeMap[Point(xpos, y)]!!) {
             result++
             xpos--
-
         }
         return result + if (xpos < 0) 0 else 1
     }
 
-    private fun visibleTreesRight(treeMap: Map<Point, Tree>): Int {
+    private fun countVisibleTreesRight(treeMap: Map<Point, Tree>): Int {
         val maxX = treeMap.maxOf { it.key.x }
         var result = 0
         var xpos = x + 1
-        while (xpos <= maxX && treeMap[Point(xpos, y)]!! < this) {
+        while (xpos <= maxX && this > treeMap[Point(xpos, y)]!!) {
             result++
             xpos++
         }
         return result + if (xpos > maxX) 0 else 1
     }
 
-    private fun visibleTreesUp(treeMap: Map<Point, Tree>): Int {
+    private fun countVisibleTreesUp(treeMap: Map<Point, Tree>): Int {
         var result = 0
         var ypos = y - 1
-        while (ypos >= 0 && treeMap[Point(x, ypos)]!! < this) {
+        while (ypos >= 0 && this > treeMap[Point(x, ypos)]!!) {
             result++
             ypos--
         }
         return result + if (ypos < 0) 0 else 1
     }
 
-    private fun visibleTreesDown(treeMap: Map<Point, Tree>): Int {
+    private fun countVisibleTreesDown(treeMap: Map<Point, Tree>): Int {
         val maxY = treeMap.maxOf { it.key.y }
         var result = 0
         var ypos = y + 1
-        while (ypos <= maxY && treeMap[Point(x, ypos)]!! < this) {
+        while (ypos <= maxY && this > treeMap[Point(x, ypos)]!!) {
             result++
             ypos++
         }
