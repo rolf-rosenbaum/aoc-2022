@@ -1,5 +1,6 @@
 package day08
 
+import Point
 import readInput
 
 typealias Forest = List<Tree>
@@ -95,4 +96,4 @@ data class Tree(val x: Int, val y: Int, val height: Int) {
     }
 }
 
-data class Point(val x: Int, val y: Int)
+
