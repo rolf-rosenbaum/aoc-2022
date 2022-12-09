@@ -1,6 +1,7 @@
 package day09
 
 import Point
+import kotlin.math.sign
 import readInput
 
 typealias Knot = Point
@@ -19,13 +20,15 @@ fun main() {
 }
 
 fun part1(input: List<String>): Int {
-    return input.toSteps().tailPositions(Rope(listOf(start, start))).size
+    return input.toSteps().tailPositions(2).size
 }
 
 fun part2(input: List<String>): Int {
+    return input.toSteps().tailPositions(10).size
+}
 
-    return input.toSteps()
-        .tailPositions(Rope(listOf(start, start, start, start, start, start, start, start, start, start))).size
+private fun List<Direction>.tailPositions(length: Int): MutableSet<Knot> {
+    return this.tailPositions(Rope(Array(length) { Point(0, 0) }.toList()))
 }
 
 private fun List<Direction>.tailPositions(rope: Rope): MutableSet<Knot> {
@@ -55,14 +58,10 @@ data class Rope(val knots: List<Knot> = emptyList()) {
     fun step(direction: Direction): Rope {
         var newRope = Rope().add(head().move(direction))
         knots.drop(1).forEach { knot ->
-            val previousKnot = newRope.tail()
-            newRope = if (knot.isAdjacentTo(previousKnot)) newRope.add(knot) else {
-                val dx = knot.x - previousKnot.x
-                val dy = knot.y - previousKnot.y
-                val newX = if (dx < 0) knot.x + 1 else if (dx > 0) knot.x - 1 else knot.x
-                val newY = if (dy < 0) knot.y + 1 else if (dy > 0) knot.y - 1 else knot.y
-                newRope.add(Knot(newX, newY))
-            }
+            val head = newRope.tail()
+            newRope =
+                if (knot.isAdjacentTo(head)) newRope.add(knot)
+                else newRope.add(Knot((head.x - knot.x).sign + knot.x, (head.y - knot.y).sign + knot.y))
         }
         return newRope
     }
