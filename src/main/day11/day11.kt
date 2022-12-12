@@ -96,7 +96,7 @@ fun part2(): Long {
 private fun playRound(monkeys: List<Monkey>, manageWorryLevel: (Long) -> Long) {
     monkeys.forEach { monkey ->
         repeat(monkey.items.size) {
-            val (nexMonkey, newItem) = monkey.inspectItem(manageWorryLevel)
+            val (nexMonkey, newItem) = monkey.inspectItem { item -> manageWorryLevel(item) }
             monkeys[nexMonkey].catchItem(newItem)
         }
     }
@@ -117,7 +117,7 @@ data class Monkey(
     }
 
     fun inspectItem(manageWorryLevel: (Long) -> Long): Pair<Int, Long> =
-        next(items.first(), manageWorryLevel)
+        next(items.first()) { item -> manageWorryLevel(item) }
             .also {
                 items.removeAt(0)
                 inspectionCount++
