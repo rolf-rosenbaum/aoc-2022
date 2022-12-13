@@ -6,6 +6,12 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation("org.junit.jupiter:junit-jupiter:5.9.0")
+    implementation("io.kotest:kotest-assertions:4.0.7")
+
+}
+
 tasks {
     sourceSets {
         main {
