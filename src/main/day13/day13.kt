@@ -29,7 +29,6 @@ sealed interface Packet : Comparable<Packet> {
             // left is empty is right also empty?
             return if (right.isEmpty()) 0 else -1
         }
-
     }
 
     data class IntPacket(val value: Int) : Packet {
@@ -44,20 +43,20 @@ sealed interface Packet : Comparable<Packet> {
     fun toListPacket(): Packet = ListPacket(mutableListOf(this))
 
     companion object {
-        fun of(input: String): Packet =
-            of(
+        fun parse(input: String): Packet =
+            toPacket(
                 input.split("""((?<=[\[\],])|(?=[\[\],]))""".toRegex())
                     .filter { it.isNotBlank() }
-                    .filter { it != "," }
+                    .filterNot { it == "," }
                     .iterator()
             )
 
-        private fun of(input: Iterator<String>): Packet {
+        private fun toPacket(input: Iterator<String>): Packet {
             val packets = mutableListOf<Packet>()
             while (input.hasNext()) {
                 when (val symbol = input.next()) {
                     "]" -> return ListPacket(packets)
-                    "[" -> packets.add(of(input))
+                    "[" -> packets.add(toPacket(input))
                     else -> packets.add(IntPacket(symbol.toInt()))
                 }
             }
@@ -65,7 +64,6 @@ sealed interface Packet : Comparable<Packet> {
         }
     }
 }
-
 
 fun main() {
     val input = readInput("main/day13/Day13")
@@ -75,7 +73,7 @@ fun main() {
 
 fun part1(input: List<String>): Int {
     val list = input.filter(String::isNotBlank).map {
-        Packet.of(it)
+        Packet.parse(it)
     }.chunked(2)
 
     return list.mapIndexed { index, signals ->
@@ -88,13 +86,12 @@ fun part1(input: List<String>): Int {
 
 fun part2(input: List<String>): Int {
 
-    val firstDivider = Packet.of("[[2]]")
-    val secondDivider = Packet.of("[[6]]")
+    val firstDivider = Packet.parse("[[2]]")
+    val secondDivider = Packet.parse("[[6]]")
 
     val list = (input.filter(String::isNotBlank).map {
-        Packet.of(it)
+        Packet.parse(it)
     } + listOf(firstDivider, secondDivider)).sorted()
 
     return (list.indexOf(firstDivider) + 1) * (list.indexOf(secondDivider) + 1)
 }
-
