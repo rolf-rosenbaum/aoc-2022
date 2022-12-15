@@ -1,5 +1,7 @@
 package day04
 
+import fullyContains
+import overlapsWith
 import readInput
 
 fun part1(input: List<String>): Int = input.solve(IntRange::fullyContains)
@@ -23,8 +25,3 @@ fun String.toRangesPairs(): Pair<IntRange, IntRange> {
     } ?: error("invalid line")
 }
 
-fun IntRange.fullyContains(other: IntRange) =
-    contains(other.first) && contains(other.last)
-
-fun IntRange.overlapsWith(other: IntRange) =
-    contains(other.first) || contains(other.last)
