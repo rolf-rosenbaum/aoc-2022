@@ -3,16 +3,14 @@ package day16
 import kotlin.math.max
 import readInput
 
-typealias Tunnels = Map<String, Valve>
+const val START = "AA"
 
 val flowRegex = """(\d+)""".toRegex()
 val valveRegex = """[A-Z]{2}""".toRegex()
 
 var totalTime = 30
-const val START = "AA"
 var maxPressureRelease = 0
-
-var allValves: Tunnels = mapOf()
+var allValves: Map<String, Valve> = mapOf()
 var shortestPaths: MutableMap<String, MutableMap<String, Int>> = mutableMapOf()
 
 fun main() {
@@ -30,7 +28,6 @@ fun part1(input: List<String>): Int {
 
 fun part2(input: List<String>): Int {
     totalTime = 26
-    maxPressureRelease = 0
     prepareSearch(input)
 
     checkAllPaths(0, START, emptySet(), 0, true)
@@ -38,6 +35,7 @@ fun part2(input: List<String>): Int {
 }
 
 private fun prepareSearch(input: List<String>) {
+    maxPressureRelease = 0
     val valves = input.map { it.parse() }
 
     allValves = valves.associateBy { it.id }
@@ -55,20 +53,13 @@ private fun checkAllPaths(currentPressureRelease: Int, currentValveId: String, v
                 currentValveId = valveId,
                 visited = visited + valveId,
                 time = time + distance + 1,
-                withElefant
+                withElefant = withElefant
             )
         }
     }
     if (withElefant) {
         checkAllPaths(currentPressureRelease, START, visited, 0, false)
     }
-}
-
-fun String.parse(): Valve {
-    val valves = valveRegex.findAll(this).map { it.groupValues.first() }.toList()
-    val flow = flowRegex.findAll(this).first().groupValues.first().toInt()
-    val tunnels = valves.drop(1)
-    return Valve(id = valves.first(), flow = flow, neighbouringValves = tunnels)
 }
 
 private fun shortestPathsFromEachTunnelToAllOtherTunnels(shortestPaths: MutableMap<String, MutableMap<String, Int>>): MutableMap<String, MutableMap<String, Int>> {
@@ -90,6 +81,13 @@ private fun shortestPathsFromEachTunnelToAllOtherTunnels(shortestPaths: MutableM
             }
     }
     return shortestPaths
+}
+
+fun String.parse(): Valve {
+    val valves = valveRegex.findAll(this).map { it.groupValues.first() }.toList()
+    val flow = flowRegex.findAll(this).first().groupValues.first().toInt()
+    val tunnels = valves.drop(1)
+    return Valve(id = valves.first(), flow = flow, neighbouringValves = tunnels)
 }
 
 data class Valve(val id: String, val flow: Int, val neighbouringValves: List<String>)
