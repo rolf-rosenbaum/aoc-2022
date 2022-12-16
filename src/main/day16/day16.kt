@@ -40,8 +40,12 @@ private fun prepareSearch(input: List<String>) {
 
     allValves = valves.associateBy { it.id }
     shortestPaths =
-        shortestPathsFromEachTunnelToAllOtherTunnels(valves.associate { it.id to it.neighbouringValves.associateWith { 1 }.toMutableMap() }
-            .toMutableMap())
+        shortestPathsFromEachTunnelToAllOtherTunnels(
+            valves.associate {
+                it.id to it.neighbouringValves.associateWith { 1 }
+                    .toMutableMap()
+            }.toMutableMap()
+        )
 }
 
 private fun checkAllPaths(currentPressureRelease: Int, currentValveId: String, visited: Set<String>, time: Int, withElefant: Boolean = false) {
