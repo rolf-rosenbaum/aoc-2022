@@ -5,6 +5,7 @@ import day17.Direction.DOWN
 import day17.Direction.LEFT
 import day17.Direction.RIGHT
 import readInput
+import second
 
 const val leftWall = 0
 const val rightWall = 6
@@ -28,6 +29,10 @@ fun main() {
 }
 
 fun part1(input: List<String>): Long {
+//    val heightDiffs = heightDiffs(input)
+//    val windowed = heightDiffs.windowed(200, 200)
+
+
     return solve(input, 2022)
 }
 
@@ -68,6 +73,32 @@ private fun solve(input: List<String>, numberOfRocks: Long): Long {
     return cave.height() + foo
 }
 
+fun heightDiffs(input: List<String>): List<Int> {
+    FallingRock.reset()
+    val cave = mutableSetOf(
+        Point(0, 0),
+        Point(1, 0),
+        Point(2, 0),
+        Point(3, 0),
+        Point(4, 0),
+        Point(5, 0),
+        Point(6, 0),
+    )
+
+    val jets = input.first().parse()
+    return (1..10000).map {
+        var rock = cave.makeAppear(FallingRock.nextShape())
+        do {
+            rock = cave.moveRock(rock, jets.next()).first
+            val result = cave.moveRock(rock, DOWN)
+            rock = result.first
+        } while (result.second)
+        cave.addAll(rock)
+        cave.height()
+    }.windowed(2).map { (it.second() - it.first()).toInt() }
+
+}
+
 private fun MutableSet<Point>.height() = maxOf { it.y }.toLong()
 
 fun TetrisCave.moveRock(rock: TetrisRock, direction: Direction): Pair<TetrisRock, Boolean> {
@@ -105,8 +136,7 @@ fun TetrisCave.makeAppear(rock: FallingRock): TetrisRock {
     val xOffset = 2
     val yOffset = maxOf { it.y } + 4
 
-    val newRock = rock.shape.map { Point(it.x + xOffset, it.y + yOffset) }.toSet()
-    return newRock
+    return rock.shape.map { Point(it.x + xOffset, it.y + yOffset) }.toSet()
 }
 
 fun TetrisCave.print() {
