@@ -13,17 +13,8 @@ fun main() {
 fun part1(input: List<String>): Long {
     val original = input.mapIndexed { index, s -> Num(originalPosition = index, number = s.toLong()) }.toMutableList()
     val mixed = mix(original)
-//    val mixed = iterativeMix(original)
 
     return summedCoordinates(mixed)
-}
-
-private fun summedCoordinates(mixed: List<Num>): Long {
-    val zero = mixed.indexOfFirst { it.number == 0L }
-    val a = mixed[(zero + 1000) % mixed.size].number
-    val b = mixed[(zero + 2000) % mixed.size].number
-    val c = mixed[(zero + 3000) % mixed.size].number
-    return a + b + c
 }
 
 fun part2(input: List<String>): Long {
@@ -35,7 +26,7 @@ fun part2(input: List<String>): Long {
     return summedCoordinates(mixed)
 }
 
-fun mix(list: MutableList<Num>, original: MutableList<Num> = list, rounds: Int = 1, position: Int = 0): List<Num> {
+private fun mix(list: MutableList<Num>, original: MutableList<Num> = list, rounds: Int = 1, position: Int = 0): List<Num> {
     if (rounds == 0) return list
 
     val index = list.indexOfFirst {
@@ -53,6 +44,14 @@ fun mix(list: MutableList<Num>, original: MutableList<Num> = list, rounds: Int =
     list.add(newIndex.toInt(), current.move())
 
     return mix(list = list, original = list, rounds = rounds, position = position + 1)
+}
+
+private fun summedCoordinates(mixed: List<Num>): Long {
+    val zero = mixed.indexOfFirst { it.number == 0L }
+    val a = mixed[(zero + 1000) % mixed.size].number
+    val b = mixed[(zero + 2000) % mixed.size].number
+    val c = mixed[(zero + 3000) % mixed.size].number
+    return a + b + c
 }
 
 data class Num(val originalPosition: Int, val currentPosition: Int = originalPosition, val number: Long, val moved: Int = 0) {
