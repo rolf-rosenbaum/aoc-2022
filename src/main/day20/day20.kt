@@ -26,24 +26,21 @@ fun part2(input: List<String>): Long {
     return summedCoordinates(mixed)
 }
 
-private fun mix(list: MutableList<Num>, original: MutableList<Num> = list, rounds: Int = 1, position: Int = 0): List<Num> {
-    if (rounds == 0) return list
+private fun mix(list: MutableList<Num>, original: MutableList<Num> = list, position: Int = 0): List<Num> {
+    if (position == list.size) return list
 
     val index = list.indexOfFirst {
-        it == original.firstOrNull() { o ->
+        it == original.firstOrNull { o ->
             o.originalPosition == position
         }
     }
-
-    if (index == -1) return mix(list = list, original = original, rounds = rounds - 1, position = 0)
-
     val current = list[index]
     var newIndex = (index + current.number) % (list.size - 1)
     if (newIndex <= 0) newIndex += list.size - 1
     list.removeAt(index)
     list.add(newIndex.toInt(), current.move())
 
-    return mix(list = list, original = list, rounds = rounds, position = position + 1)
+    return mix(list = list, original = list, position = position + 1)
 }
 
 private fun summedCoordinates(mixed: List<Num>): Long {
