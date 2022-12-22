@@ -1,6 +1,6 @@
 package day11
 
-fun prdMonkeys() = mutableListOf(
+private fun prdMonkeys() = mutableListOf(
     Monkey(
         id = 0,
         items = mutableListOf(72, 64, 51, 57, 93, 97, 68),
@@ -102,7 +102,7 @@ private fun playRound(monkeys: List<Monkey>, manageWorryLevel: (Long) -> Long) {
     }
 }
 
-data class Monkey(
+private data class Monkey(
     val id: Int,
     val items: MutableList<Long>,
     val operation: (Long) -> Long,
@@ -131,7 +131,7 @@ data class Monkey(
     }
 }
 
-fun testMonkeys() = mutableListOf(
+private fun testMonkeys() = mutableListOf(
     Monkey(
         id = 0,
         items = mutableListOf(79, 98),
