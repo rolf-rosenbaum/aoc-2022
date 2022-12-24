@@ -4,13 +4,13 @@ import kotlin.math.max
 import kotlin.math.min
 import readInput
 
-typealias Cave = MutableSet<Point>
-typealias Rock = Point
-typealias Grain = Point
+private typealias Cave = MutableSet<Point>
+private typealias Rock = Point
+private typealias Grain = Point
 
-data class Point(val x: Int, val y: Int)
+private data class Point(val x: Int, val y: Int)
 
-val source = Point(500, 0)
+private val source = Point(500, 0)
 
 fun main() {
     val input = readInput("main/day14/Day14_test")
@@ -35,7 +35,7 @@ fun part2(input: List<String>): Int {
     return cave.pourSand()
 }
 
-fun Cave.pourSand(): Int {
+private fun Cave.pourSand(): Int {
     val startSize = size
     do {
         val droppedGrain = source.fall(this)
@@ -58,7 +58,7 @@ private fun Grain.fall(cave: Cave): Grain? {
     return this
 }
 
-fun Cave.addRock(start: Point, end: Point) {
+private fun Cave.addRock(start: Point, end: Point) {
     val startX = min(start.x, end.x)
     val startY = min(start.y, end.y)
     val endX = max(start.x, end.x)
@@ -71,7 +71,7 @@ fun Cave.addRock(start: Point, end: Point) {
     }
 }
 
-fun List<String>.parseTosSolidRock(): Cave {
+private fun List<String>.parseTosSolidRock(): Cave {
     val cave = mutableSetOf<Point>()
 
     map { line ->
@@ -87,7 +87,7 @@ fun List<String>.parseTosSolidRock(): Cave {
     return cave
 }
 
-fun rock(point: String): Rock {
+private fun rock(point: String): Rock {
     return point.split(",").map { it.toInt() }.let { (x, y) ->
         Point(x, y)
     }

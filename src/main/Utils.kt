@@ -22,7 +22,22 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
 
 data class Point(val x: Int, val y: Int) {
     fun neighbours(): List<Point> = listOf(Point(x + 1, y), Point(x, y + 1), Point(x - 1, y), Point(x, y - 1))
+
+    fun allNeighbours(): Set<Point> =
+        setOf(
+            Point(x - 1, y - 1),
+            Point(x, y - 1),
+            Point(x + 1, y - 1),
+            Point(x - 1, y),
+            Point(x + 1, y),
+            Point(x - 1, y + 1),
+            Point(x, y + 1),
+            Point(x + 1, y + 1)
+        )
+
+
     fun distanceTo(other: Point) = abs(x - other.x) + abs(y - other.y)
+    operator fun plus(other: Point) = Point(x + other.x, y + other.y)
 }
 
 fun IntRange.fullyContains(other: IntRange) =
