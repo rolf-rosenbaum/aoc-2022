@@ -21,7 +21,9 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
     .padStart(32, '0')
 
 data class Point(val x: Int, val y: Int) {
-    fun neighbours(): List<Point> = listOf(Point(x + 1, y), Point(x, y + 1), Point(x - 1, y), Point(x, y - 1))
+    fun neighbours(includeCenter: Boolean = false): List<Point> =
+        if (includeCenter) listOf(Point(x, y + 1), Point(x + 1, y), this, Point(x, y - 1), Point(x - 1, y))
+        else listOf(Point(x, y + 1), Point(x + 1, y), Point(x, y - 1), Point(x - 1, y))
 
     fun allNeighbours(): Set<Point> =
         setOf(

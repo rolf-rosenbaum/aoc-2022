@@ -80,8 +80,8 @@ private fun shortestPathsFromEachTunnelToAllOtherTunnels(shortestPaths: MutableM
     }
     shortestPaths.values.forEach {
         it.keys.mapNotNull { key -> if (allValves[key]?.flow == 0) key else null }
-            .forEach { toRemove ->
-                it.remove(toRemove)
+            .forEach { uselessValve ->
+                it.remove(uselessValve)
             }
     }
     return shortestPaths
