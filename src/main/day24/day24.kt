@@ -16,11 +16,9 @@ private val minX = initialValley.keys.minOf { it.x }
 private val maxY = initialValley.keys.maxOf { it.y }
 private val minY = initialValley.keys.minOf { it.y }
 private val start = initialValley.filter { it.key.y == minY }.keys.first { initialValley[it]!!.isEmpty() }
-private val goal = initialValley.filter { it.key.y == maxY }.keys.first { initialValley[it]!!.isEmpty() }
+private val exit = initialValley.filter { it.key.y == maxY }.keys.first { initialValley[it]!!.isEmpty() }
 private val walls = initialValley.filter { it.value.firstOrNull() == WALL }
-private val valleySequence = generateSequence(initialValley) { it.step() }.take(2000).toList()
-
-private var minPathLength = 1_000
+private val valleySequence = generateSequence(initialValley) { it.step() }.take(1000).toList()
 
 fun main() {
 
@@ -29,34 +27,30 @@ fun main() {
 }
 
 fun part1(): Int {
-
-
-    return findPath(start)
-//    return minPathLength
+    return findPath()
 }
 
 fun part2(): Int {
-
-    val toGoal = findPath(start)
-    val backToStart = findPath(start = goal, currentStep = toGoal, end = start)
-    val backToGoalAgain = findPath(start = start, currentStep = backToStart)
-
-    return backToGoalAgain
+    val toGoal = findPath()
+    val backToStart = findPath(entry = exit, currentStep = toGoal, goal = start)
+    return findPath(currentStep = backToStart)
 }
 
-fun findPath(start: Point, currentStep: Int = 0, end: Point = goal): Int {
-    val queue = mutableListOf(start to currentStep)
-    val visited = mutableSetOf<Pair<Point, Int>>()
+fun findPath(entry: Point = start, currentStep: Int = 0, goal: Point = exit): Int {
+    val pathsToCheck = mutableListOf(State(entry, currentStep))
+    val checked = mutableSetOf<State>()
 
-    while (queue.isNotEmpty()) {
-        val current = queue.removeFirst()
-        if (current !in visited) {
-            visited += current
-            val nextValley = valleySequence[current.second + 1]
-            val neighbours = validNeighboursFor(current.first)
-            if (end in neighbours) return current.second + 1
-            neighbours.filter { nextValley.isOpenAt(it) }.forEach {
-                queue.add(it to current.second + 1)
+    while (pathsToCheck.isNotEmpty()) {
+        val current = pathsToCheck.removeFirst()
+        if (current !in checked) {
+            val nextValley = valleySequence[current.step + 1]
+            val neighbours = validNeighboursFor(current.point).filter { nextValley.isOpenAt(it) }
+
+            if (goal in neighbours) return current.step + 1
+
+            checked += current
+            neighbours.forEach {
+                pathsToCheck.add(State(it, current.step + 1))
             }
         }
     }
@@ -86,43 +80,40 @@ fun validNeighboursFor(p: Point) = p.neighbours(true)
     .filter { it.x in (minX..maxX) }
     .filter { it.y in (minY..maxY) }
 
-fun Valley.isOpenAt(p: Point): Boolean {
-    return this[p].isNullOrEmpty()
-}
+fun Valley.isOpenAt(p: Point): Boolean = this[p].isNullOrEmpty()
 
-fun Valley.step(): Valley {
-    // start and goal must always be in the map
-    val result = mutableMapOf<Point, MutableList<Blizzard>>(
+fun Valley.step(): Valley =
+    mutableMapOf<Point, MutableList<Blizzard>>(
+        // start and goal must always be in the map
         start to mutableListOf(),
-        goal to mutableListOf()
-    )
-    (minX..maxX).forEach { x ->
-        (minY..maxY).forEach { y ->
-            val here = Point(x, y)
-            val blizzards = this[here]
-            if (!blizzards.isNullOrEmpty()) {
-                blizzards.forEach { blizzard ->
-                    var newLocation = here + blizzard.diff
-                    if (newLocation in walls) {
-                        newLocation = when (blizzard) {
-                            LEFT -> Point(maxX - 1, y)
-                            RIGHT -> Point(minX + 1, y)
-                            UP -> Point(x, maxY - 1)
-                            DOWN -> Point(x, minY + 1)
-                            WALL -> Point(x, y) // walls do not move
+        exit to mutableListOf()
+    ).let { result ->
+        (minX..maxX).forEach { x ->
+            (minY..maxY).forEach { y ->
+                val here = Point(x, y)
+                val blizzards = this[here]
+                if (!blizzards.isNullOrEmpty()) {
+                    blizzards.forEach { blizzard ->
+                        var newLocation = here + blizzard.offset
+                        if (newLocation in walls) {
+                            newLocation = when (blizzard) {
+                                LEFT -> Point(maxX - 1, y)
+                                RIGHT -> Point(minX + 1, y)
+                                UP -> Point(x, maxY - 1)
+                                DOWN -> Point(x, minY + 1)
+                                WALL -> Point(x, y) // walls do not move
+                            }
                         }
+                        if (result[newLocation] == null) result[newLocation] = mutableListOf(blizzard)
+                        else result[newLocation]!!.add(blizzard)
                     }
-                    if (result[newLocation] == null) result[newLocation] = mutableListOf(blizzard)
-                    else result[newLocation]!!.add(blizzard)
                 }
             }
         }
+        result
     }
 
-    return result
-}
-
-enum class Blizzard(val diff: Point) {
+enum class Blizzard(val offset: Point) {
     LEFT(Point(-1, 0)),
     RIGHT(Point(1, 0)),
     UP(Point(0, -1)),
@@ -130,29 +121,4 @@ enum class Blizzard(val diff: Point) {
     WALL(Point(0, 0)),
 }
 
-fun Valley.print(p: Point) {
-    (minY..maxY).forEach { y ->
-        (minX..maxX).forEach { x ->
-            if (p == Point(x, y)) {
-                print("🤪")
-            } else {
-                val here = this[Point(x, y)]
-                if (here.isNullOrEmpty())
-                    print(" ")
-                else if (here.size == 1)
-                    print(
-                        when (here.first()) {
-                            LEFT -> "<"
-                            RIGHT -> ">"
-                            UP -> "^"
-                            DOWN -> "v"
-                            WALL -> "#"
-                        }
-                    )
-                else print(here.size)
-            }
-        }
-        println()
-    }
-    println()
-}
+data class State(val point: Point, val step: Int)

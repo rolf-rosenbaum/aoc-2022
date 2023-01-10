@@ -7,17 +7,11 @@ fun part1(input: List<String>): Int {
 }
 
 private fun sumsByElf(input: List<String>): List<Int> {
-    var sum = 0
-    return input.map {
-        if (it.isBlank()) {
-            val tmp = sum
-            sum = 0
-            tmp
-        } else {
-            sum += it.toInt()
-            0
+    return input.joinToString("\n").split("\n\n")
+        .map {
+            it.split("\n")
+                .sumOf { s -> s.toInt() }
         }
-    }
 }
 
 fun part2(input: List<String>): Int {

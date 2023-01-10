@@ -4,13 +4,13 @@ import Point
 import kotlin.math.sign
 import readInput
 
-typealias Knot = Point
+typealias Segment = Point
 
 enum class Direction { R, U, D, L }
 
 val regex = """([RUDL]) (\d+)""".toRegex()
 
-val start = Knot(0, 0)
+val start = Segment(0, 0)
 
 fun main() {
     val input = readInput("main/day09/Day09")
@@ -27,19 +27,16 @@ fun part2(input: List<String>): Int {
     return input.toSteps().tailPositions(10).size
 }
 
-private fun List<Direction>.tailPositions(length: Int): MutableSet<Knot> {
+private fun List<Direction>.tailPositions(length: Int): Collection<Segment> {
     return this.tailPositions(Rope(Array(length) { Point(0, 0) }.toList()))
 }
 
-private fun List<Direction>.tailPositions(rope: Rope): MutableSet<Knot> {
-    val touchedPositions = mutableSetOf<Knot>()
-    var tmp = rope
-    touchedPositions.add(rope.tail())
-    forEach {
-        tmp = tmp.step(it)
-        touchedPositions.add(tmp.tail())
-    }
-    return touchedPositions
+private fun List<Direction>.tailPositions(rope: Rope): Collection<Segment> {
+    val directions = iterator()
+    return generateSequence(rope) {
+        if (directions.hasNext()) it.step(directions.next())
+        else null
+    }.takeWhile { it != null }.map { it.tail() }.distinct().toList()
 }
 
 fun List<String>.toSteps(): List<Direction> {
@@ -54,28 +51,28 @@ fun List<String>.toSteps(): List<Direction> {
     return directions
 }
 
-data class Rope(val knots: List<Knot> = emptyList()) {
+data class Rope(val segments: List<Segment> = emptyList()) {
     fun step(direction: Direction): Rope {
         var newRope = Rope().add(head().move(direction))
-        knots.drop(1).forEach { knot ->
+        segments.drop(1).forEach { knot ->
             val head = newRope.tail()
             newRope =
                 if (knot.isAdjacentTo(head)) newRope.add(knot)
-                else newRope.add(Knot((head.x - knot.x).sign + knot.x, (head.y - knot.y).sign + knot.y))
+                else newRope.add(Segment((head.x - knot.x).sign + knot.x, (head.y - knot.y).sign + knot.y))
         }
         return newRope
     }
 
-    private fun head() = knots.first()
-    fun tail(): Knot = knots.last()
-    private fun add(knot: Knot) = copy(knots = knots + knot)
+    private fun head() = segments.first()
+    fun tail(): Segment = segments.last()
+    private fun add(segment: Segment) = copy(segments = segments + segment)
 }
 
-fun Knot.isAdjacentTo(other: Knot): Boolean {
+fun Segment.isAdjacentTo(other: Segment): Boolean {
     return other.x in (x - 1..x + 1) && other.y in (y - 1..y + 1)
 }
 
-fun Knot.move(direction: Direction) =
+fun Segment.move(direction: Direction) =
     when (direction) {
         Direction.R -> copy(x = x + 1)
         Direction.U -> copy(y = y + 1)
