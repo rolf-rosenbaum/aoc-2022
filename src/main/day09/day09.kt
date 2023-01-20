@@ -27,13 +27,11 @@ fun part2(input: List<String>): Int {
     return input.toSteps().tailPositions(10).size
 }
 
-private fun List<Direction>.tailPositions(length: Int): Collection<Segment> {
-    return this.tailPositions(Rope(Array(length) { Point(0, 0) }.toList()))
-}
+private fun List<Direction>.tailPositions(length: Int) =
+    tailPositions(Rope(Array(length) { Point(0, 0) }.toList()))
 
-private fun List<Direction>.tailPositions(rope: Rope): Collection<Segment> {
-    val directions = iterator()
-    return generateSequence(rope) {
+private fun List<Direction>.tailPositions(rope: Rope) = iterator().let { directions ->
+    generateSequence(rope) {
         if (directions.hasNext()) it.step(directions.next())
         else null
     }.takeWhile { it != null }.map { it.tail() }.distinct().toList()
@@ -54,11 +52,11 @@ fun List<String>.toSteps(): List<Direction> {
 data class Rope(val segments: List<Segment> = emptyList()) {
     fun step(direction: Direction): Rope {
         var newRope = Rope().add(head().move(direction))
-        segments.drop(1).forEach { knot ->
+        segments.drop(1).forEach { segment ->
             val head = newRope.tail()
             newRope =
-                if (knot.isAdjacentTo(head)) newRope.add(knot)
-                else newRope.add(Segment((head.x - knot.x).sign + knot.x, (head.y - knot.y).sign + knot.y))
+                if (segment.isAdjacentTo(head)) newRope.add(segment)
+                else newRope.add(Segment((head.x - segment.x).sign + segment.x, (head.y - segment.y).sign + segment.y))
         }
         return newRope
     }
