@@ -14,7 +14,7 @@ typealias TetrisCave = MutableSet<Point>
 typealias TetrisRock = Set<Point>
 
 data class Jets(val jets: List<Direction>) {
-    var index = 0
+    private var index = 0
     fun next() = jets[index++ % jets.size]
 }
 
@@ -22,72 +22,47 @@ enum class Direction {
     DOWN, LEFT, RIGHT
 }
 
+val fallingRocks = listOf(
+    setOf(Point(0, 0), Point(1, 0), Point(2, 0), Point(3, 0)),
+    setOf(Point(1, 0), Point(0, 1), Point(1, 1), Point(2, 1), Point(1, 2)),
+    setOf(Point(0, 0), Point(1, 0), Point(2, 0), Point(2, 1), Point(2, 2)),
+    setOf(Point(0, 0), Point(0, 1), Point(0, 2), Point(0, 3)),
+    setOf(Point(0, 0), Point(1, 0), Point(0, 1), Point(1, 1))
+)
+
 fun main() {
     val input = readInput("main/day17/Day17")
-    println(part1(input))
-    println(part2(input))
+    val heightDiffs = heightDiffs(input)
+    val (rocksBeforePattern, patternSize) = heightDiffs.findPattern()
+    println("$rocksBeforePattern, $patternSize")
+
+    println(part1(heightDiffs, rocksBeforePattern, patternSize))
+    println(part2(heightDiffs, rocksBeforePattern, patternSize))
 }
 
-fun part1(input: List<String>): Long {
-//    val heightDiffs = heightDiffs(input)
-//    val windowed = heightDiffs.windowed(200, 200)
-
-
-    return solve(input, 2022)
+fun part1(heightDiffs: List<Int>, index: Int, patternSize: Int): Long {
+    return solve(heightDiffs, index, patternSize, 2022)
 }
 
-fun part2(input: List<String>): Long {
-    return solve(input, 1000000000000L)
+fun part2(input: List<Int>, index: Int, patternSize: Int): Long {
+    return solve(input, index, patternSize, 1000000000000L)
 }
 
-private fun solve(input: List<String>, numberOfRocks: Long): Long {
-    FallingRock.reset()
-    val cave = mutableSetOf(
-        Point(0, 0),
-        Point(1, 0),
-        Point(2, 0),
-        Point(3, 0),
-        Point(4, 0),
-        Point(5, 0),
-        Point(6, 0),
-    )
+private fun solve(heightDiffs: List<Int>, rocksBeforePattern: Int, patternSize: Int, numberOfRocks: Long): Long {
+    val rocksLeft = numberOfRocks - rocksBeforePattern
 
-    val jets = input.first().parse()
-    (1..90).forEach {
-        var rock = cave.makeAppear(FallingRock.nextShape())
-        do {
-            rock = cave.moveRock(rock, jets.next()).first
-            val result = cave.moveRock(rock, DOWN)
-            rock = result.first
-        } while (result.second)
-        cave.addAll(rock)
-    }
-
-    val pattern = readInput("main/day17/pattern").map { it.toInt() }
-    val patternSize = pattern.size
+    val pattern = heightDiffs.drop(rocksBeforePattern - 1).take(patternSize)
     val patternSum = pattern.sum()
-
-    var rocksLeft = numberOfRocks - 90
     val foo = rocksLeft / patternSize * patternSum + pattern.take((rocksLeft - rocksLeft / patternSize * patternSize).toInt()).sum()
 
-    return cave.height() + foo
+    return heightDiffs.take(rocksBeforePattern).sum() + foo
 }
 
 fun heightDiffs(input: List<String>): List<Int> {
-    FallingRock.reset()
-    val cave = mutableSetOf(
-        Point(0, 0),
-        Point(1, 0),
-        Point(2, 0),
-        Point(3, 0),
-        Point(4, 0),
-        Point(5, 0),
-        Point(6, 0),
-    )
-
+    val cave = emptyCaveWithFloor()
     val jets = input.first().parse()
-    return (1..10000).map {
-        var rock = cave.makeAppear(FallingRock.nextShape())
+    return (0..5000).map {
+        var rock = cave.nextRock(shapeFor(it))
         do {
             rock = cave.moveRock(rock, jets.next()).first
             val result = cave.moveRock(rock, DOWN)
@@ -96,35 +71,60 @@ fun heightDiffs(input: List<String>): List<Int> {
         cave.addAll(rock)
         cave.height()
     }.windowed(2).map { (it.second() - it.first()).toInt() }
-
 }
 
-private fun MutableSet<Point>.height() = maxOf { it.y }.toLong()
+private fun shapeFor(it: Int) = fallingRocks[it % fallingRocks.size]
+
+private fun emptyCaveWithFloor() = mutableSetOf(
+    Point(0, 0),
+    Point(1, 0),
+    Point(2, 0),
+    Point(3, 0),
+    Point(4, 0),
+    Point(5, 0),
+    Point(6, 0),
+)
+
+fun List<Int>.findPattern(): Pair<Int, Int> {
+    (20..size / 2).forEach { windowSize ->
+        print("$windowSize\r")
+        val tmp = this.windowed(windowSize)
+        tmp.forEachIndexed { index, intList ->
+            if (index + windowSize >= tmp.size)
+                return@forEachIndexed
+            if (intList == tmp[index + windowSize])
+                return index + 1 to windowSize
+        }
+    }
+    error("no pattern")
+}
+
+private fun TetrisCave.height() = maxOf { it.y }.toLong()
 
 fun TetrisCave.moveRock(rock: TetrisRock, direction: Direction): Pair<TetrisRock, Boolean> {
     var movedRock: TetrisRock = rock
     var rockMoved = false
     when (direction) {
         DOWN -> {
-            val tmp = rock.map { Point(it.x, it.y - 1) }
-            if (tmp.none { this.contains(it) }) {
-                movedRock = tmp.toSet()
+            val probedRock = rock.map { Point(it.x, it.y - 1) }
+            if (probedRock.none { this.contains(it) }) {
+                movedRock = probedRock.toSet()
                 rockMoved = true
             }
         }
 
         LEFT -> {
-            val tmp = rock.map { Point(it.x - 1, it.y) }
-            if (tmp.none { this.contains(it) || it.x < leftWall }) {
-                movedRock = tmp.toSet()
+            val probedRock = rock.map { Point(it.x - 1, it.y) }
+            if (probedRock.none { this.contains(it) || it.x < leftWall }) {
+                movedRock = probedRock.toSet()
                 rockMoved = true
             }
         }
 
         RIGHT -> {
-            val tmp = rock.map { Point(it.x + 1, it.y) }
-            if (tmp.none { this.contains(it) || it.x > rightWall }) {
-                movedRock = tmp.toSet()
+            val probedRock = rock.map { Point(it.x + 1, it.y) }
+            if (probedRock.none { this.contains(it) || it.x > rightWall }) {
+                movedRock = probedRock.toSet()
                 rockMoved = true
             }
         }
@@ -132,56 +132,10 @@ fun TetrisCave.moveRock(rock: TetrisRock, direction: Direction): Pair<TetrisRock
     return movedRock to rockMoved
 }
 
-fun TetrisCave.makeAppear(rock: FallingRock): TetrisRock {
+fun TetrisCave.nextRock(rock: TetrisRock): TetrisRock {
     val xOffset = 2
     val yOffset = maxOf { it.y } + 4
-
-    return rock.shape.map { Point(it.x + xOffset, it.y + yOffset) }.toSet()
-}
-
-fun TetrisCave.print() {
-    (maxOf { it.y } downTo 0).forEach { y ->
-        (-1..7).forEach { x ->
-            if (y == 0) print("-")
-            else
-                if (x == -1 || x == 7) print("|")
-                else
-                    if (contains(Point(x, y))) print("#")
-                    else print(".")
-        }
-        println()
-    }
-    println()
-}
-
-enum class FallingRock(val shape: TetrisRock) {
-    LINE(setOf(Point(0, 0), Point(1, 0), Point(2, 0), Point(3, 0))),
-    CROSS(setOf(Point(1, 0), Point(0, 1), Point(1, 1), Point(2, 1), Point(1, 2))),
-    L_SHAPE(setOf(Point(0, 0), Point(1, 0), Point(2, 0), Point(2, 1), Point(2, 2))),
-    NEEDLE(setOf(Point(0, 0), Point(0, 1), Point(0, 2), Point(0, 3))),
-    BLOCK(setOf(Point(0, 0), Point(1, 0), Point(0, 1), Point(1, 1)));
-
-    fun print() {
-        (3 downTo 0).forEach { y ->
-            (0..3).forEach { x ->
-                if (shape.contains(Point(x, y))) print("#") else print(".")
-            }
-            println()
-        }
-        println()
-    }
-
-    companion object {
-        private var index = 0
-        fun nextShape(): FallingRock {
-            return values()[index++ % 5]
-        }
-
-        fun reset() {
-            index = 0
-        }
-
-    }
+    return rock.map { Point(it.x + xOffset, it.y + yOffset) }.toSet()
 }
 
 fun String.parse(): Jets = map {
