@@ -53,9 +53,10 @@ private fun solve(heightDiffs: List<Int>, rocksBeforePattern: Int, patternSize: 
 
     val pattern = heightDiffs.drop(rocksBeforePattern - 1).take(patternSize)
     val patternSum = pattern.sum()
-    val foo = rocksLeft / patternSize * patternSum + pattern.take((rocksLeft - rocksLeft / patternSize * patternSize).toInt()).sum()
 
-    return heightDiffs.take(rocksBeforePattern).sum() + foo
+    return heightDiffs.take(rocksBeforePattern).sum() +
+            rocksLeft / patternSize * patternSum +
+            pattern.take((rocksLeft - rocksLeft / patternSize * patternSize).toInt()).sum()
 }
 
 fun heightDiffs(input: List<String>): List<Int> {
