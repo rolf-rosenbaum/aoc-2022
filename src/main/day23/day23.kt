@@ -15,8 +15,8 @@ var directionsToCheck = mutableListOf(
 fun main() {
     val input = readInput("main/day23/Day23")
 
-    println(part1(input))
-    println(part2(input))
+    println(year_2017.day23.part1(input))
+    println(year_2017.day23.part2(input))
 }
 
 fun part1(input: List<String>): Int {

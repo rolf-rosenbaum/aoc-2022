@@ -36,16 +36,8 @@ fun main() {
     val (rocksBeforePattern, patternSize) = heightDiffs.findPattern()
     println("$rocksBeforePattern, $patternSize")
 
-    println(part1(heightDiffs, rocksBeforePattern, patternSize))
-    println(part2(heightDiffs, rocksBeforePattern, patternSize))
-}
-
-fun part1(heightDiffs: List<Int>, index: Int, patternSize: Int): Long {
-    return solve(heightDiffs, index, patternSize, 2022)
-}
-
-fun part2(input: List<Int>, index: Int, patternSize: Int): Long {
-    return solve(input, index, patternSize, 1000000000000L)
+    println("Part1: ${solve(heightDiffs, rocksBeforePattern, patternSize, 2022)}")
+    println("Part1: ${solve(heightDiffs, rocksBeforePattern, patternSize, 1000000000000L)}")
 }
 
 private fun solve(heightDiffs: List<Int>, rocksBeforePattern: Int, patternSize: Int, numberOfRocks: Long): Long {
@@ -55,8 +47,8 @@ private fun solve(heightDiffs: List<Int>, rocksBeforePattern: Int, patternSize: 
     val patternSum = pattern.sum()
 
     return heightDiffs.take(rocksBeforePattern).sum() +
-            rocksLeft / patternSize * patternSum +
-            pattern.take((rocksLeft - rocksLeft / patternSize * patternSize).toInt()).sum()
+            (rocksLeft / patternSize * patternSum +
+                    pattern.take((rocksLeft - rocksLeft / patternSize * patternSize).toInt()).sum())
 }
 
 fun heightDiffs(input: List<String>): List<Int> {
@@ -87,7 +79,7 @@ private fun emptyCaveWithFloor() = mutableSetOf(
 )
 
 fun List<Int>.findPattern(): Pair<Int, Int> {
-    (20..size / 2).forEach { windowSize ->
+    (1650..size / 2).forEach { windowSize ->
         print("$windowSize\r")
         val tmp = this.windowed(windowSize)
         tmp.forEachIndexed { index, intList ->

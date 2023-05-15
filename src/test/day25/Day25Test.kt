@@ -1,9 +1,9 @@
-package day24
+package day25
 
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
-class Day24Test {
+class Day25Test {
 
     @Test
     fun `snafucate 0, 1, 2`() {
