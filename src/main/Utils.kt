@@ -43,3 +43,17 @@ fun IntRange.union(other: IntRange): IntRange? {
         IntRange(minOf(first, other.first), maxOf(last, other.last))
     else null
 }
+
+fun List<Int>.findPattern(startIndex: Int = 1650): Pair<Int, Int> {
+    (startIndex..size / 2).forEach { windowSize ->
+        print("$windowSize\r")
+        val tmp = this.windowed(windowSize)
+        tmp.forEachIndexed { index, intList ->
+            if (index + windowSize >= tmp.size)
+                return@forEachIndexed
+            if (intList == tmp[index + windowSize])
+                return index + 1 to windowSize
+        }
+    }
+    error("no pattern")
+}

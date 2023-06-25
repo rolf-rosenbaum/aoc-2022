@@ -4,6 +4,7 @@ import Point
 import day17.Direction.DOWN
 import day17.Direction.LEFT
 import day17.Direction.RIGHT
+import findPattern
 import readInput
 import second
 
@@ -33,7 +34,7 @@ val fallingRocks = listOf(
 fun main() {
     val input = readInput("main/day17/Day17")
     val heightDiffs = heightDiffs(input)
-    val (rocksBeforePattern, patternSize) = heightDiffs.findPattern()
+    val (rocksBeforePattern, patternSize) = heightDiffs.findPattern(1650)
     println("$rocksBeforePattern, $patternSize")
 
     println("Part1: ${solve(heightDiffs, rocksBeforePattern, patternSize, 2022)}")
@@ -77,20 +78,6 @@ private fun emptyCaveWithFloor() = mutableSetOf(
     Point(5, 0),
     Point(6, 0),
 )
-
-fun List<Int>.findPattern(): Pair<Int, Int> {
-    (1650..size / 2).forEach { windowSize ->
-        print("$windowSize\r")
-        val tmp = this.windowed(windowSize)
-        tmp.forEachIndexed { index, intList ->
-            if (index + windowSize >= tmp.size)
-                return@forEachIndexed
-            if (intList == tmp[index + windowSize])
-                return index + 1 to windowSize
-        }
-    }
-    error("no pattern")
-}
 
 private fun TetrisCave.height() = maxOf { it.y }.toLong()
 
