@@ -44,7 +44,7 @@ fun IntRange.union(other: IntRange): IntRange? {
     else null
 }
 
-fun List<Int>.findPattern(startIndex: Int = 1650): Pair<Int, Int> {
+fun List<Int>.findPattern(startIndex: Int = 1): Pair<Int, Int> {
     (startIndex..size / 2).forEach { windowSize ->
         print("$windowSize\r")
         val tmp = this.windowed(windowSize)
