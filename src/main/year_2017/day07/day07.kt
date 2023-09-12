@@ -66,6 +66,6 @@ fun String.parse(): Program {
         val programs = if (it.size > 1) {
             it.second().split((", ").trim())
         } else emptyList()
-        Program(name.trim(), weight, programs.map { p -> p.trim() })
+        Program(name.trim(), weight, programs.map(String::trim))
     }
 }
